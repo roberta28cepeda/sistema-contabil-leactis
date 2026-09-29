@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responde — protótipo funcional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="brandrow">
+      <div class="brand">Responde <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-soft);">· protótipo</span></div>
+      <div class="toolbar">
+        <span class="clock" id="clock">—</span>
+        <button class="pill-btn" id="advanceTime" type="button">+1 dia (simular)</button>
+        <button class="pill-btn" id="resetDemo" type="button">Reiniciar dados</button>
+        <button class="theme-toggle" id="themeToggle" type="button">Modo escuro</button>
+      </div>
+    </div>
+    <h1>O bot que atende seu cliente antes que ele ligue pra você</h1>
+    <p class="lede">Protótipo funcional com banco de dados real por trás — cada resposta é calculada a partir dos dados reais de cada cliente, não é texto fixo. O WhatsApp em si ainda é simulado; a lógica de negócio é real.</p>
+  </header>
+
+  <nav class="phase-nav" role="tablist" aria-label="Fases do produto">
+    <button class="phase-tab active" data-tab="1" role="tab" aria-selected="true"><span class="num">Fase 1</span><span class="label">Responde</span></button>
+    <button class="phase-tab" data-tab="2" role="tab" aria-selected="false"><span class="num">Fase 2</span><span class="label">Cobra</span></button>
+    <button class="phase-tab" data-tab="3" role="tab" aria-selected="false"><span class="num">Fase 3</span><span class="label">Radar</span></button>
+  </nav>
+
+  <!-- FASE 1 -->
+  <section class="phase-panel active" data-panel="1">
+    <p class="phase-intro"><strong>O bot que responde na hora.</strong> Escolha um cliente, mande uma pergunta (ou use os atalhos) e veja o bot buscar a resposta nos dados reais desse cliente no banco.</p>
+
+    <div class="client-picker" id="clientPicker"></div>
+
+    <div class="mode-switch" role="group" aria-label="Modo de operação">
+      <button type="button" id="modeAssistido" class="active">Assistido</button>
+      <button type="button" id="modeAutomatico">Automático</button>
+    </div>
+    <p class="mode-note" id="modeNote"></p>
+
+    <div class="stage">
+      <div class="phone">
+        <div class="phone-bar">
+          <div class="phone-avatar" id="phoneAvatar">?</div>
+          <div>
+            <div class="phone-name" id="phoneName">Selecione um cliente</div>
+            <div class="phone-sub" id="phoneSub"></div>
+          </div>
+        </div>
+        <div class="phone-body" id="phoneBody"><div class="phone-empty" id="phoneEmpty">Escolha um cliente acima para ver a conversa.</div></div>
+        <div class="quick-qs" id="quickQs">
+          <button type="button" data-q="Já venceu meu DAS desse mês?">"Já venceu meu DAS desse mês?"</button>
+          <button type="button" data-q="Perdi o boleto dos honorários, pode mandar de novo?">"Perdi o boleto, pode mandar de novo?"</button>
+          <button type="button" data-q="Vocês receberam minha nota fiscal?">"Vocês receberam minha nota fiscal?"</button>
+        </div>
+        <form class="compose" id="composeForm">
+          <input type="text" id="composeInput" placeholder="Escreva uma mensagem livre..." autocomplete="off">
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">Painel do contador</h3>
+        <p class="panel-sub">Fila de respostas aguardando aprovação (todos os clientes)</p>
+        <div id="panelBody"><div class="queue-empty" id="queueEmpty">Nenhuma pergunta pendente.</div></div>
+        <div class="log-section">
+          <p class="log-title">Histórico — o mesmo registro que alimenta a Cobra e o Radar</p>
+          <ul class="log-list" id="logList"><li class="log-empty">Ainda sem atividade.</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FASE 2 -->
+  <section class="phase-panel" data-panel="2">
+    <p class="phase-intro"><strong>Cobrar documento sem virar secretária.</strong> O estágio de cada pendência é calculado de verdade a partir da data em que foi registrada — use "+1 dia" no topo para ver o escalonamento avançar.</p>
+
+    <div class="escalation">
+      <div class="escalation-step"><span class="day">Dia 1</span><span class="what">Lembrete leve automático</span></div>
+      <div class="escalation-step"><span class="day">Dia 3</span><span class="what">Segundo lembrete, mais direto</span></div>
+      <div class="escalation-step"><span class="day">Dia 7</span><span class="what">Escalonado — contador é avisado</span></div>
+    </div>
+
+    <table class="doc-table">
+      <thead><tr><th>Cliente</th><th>Documento pendente</th><th>Atraso</th><th>Status</th><th></th></tr></thead>
+      <tbody id="docTableBody"></tbody>
+    </table>
+  </section>
+
+  <!-- FASE 3 -->
+  <section class="phase-panel" data-panel="3">
+    <p class="phase-intro"><strong>Ver o risco antes do e-mail de rescisão.</strong> O score de cada cliente é somado em tempo real: dias de silêncio + documentos atrasados + reclamações registradas — todos vindos do mesmo histórico das fases 1 e 2.</p>
+
+    <div class="risk-grid" id="riskGrid"></div>
+    <div class="risk-detail" id="riskDetail">
+      <h4 id="riskDetailName"></h4>
+      <p id="riskDetailSignals"></p>
+      <p class="action" id="riskDetailAction"></p>
+      <button class="btn btn-ghost complaint-btn" id="logComplaintBtn" type="button">Registrar reclamação deste cliente</button>
+    </div>
+  </section>
+
+  <p class="footnote"><strong>Sobre este protótipo:</strong> os dados são fictícios e o WhatsApp é simulado na tela, mas cada resposta, estágio de cobrança e score de risco é calculado por um backend real (Flask + Supabase/Postgres) a partir de dados reais salvos no banco — nada aqui é texto fixo por cliente.</p>
+
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
